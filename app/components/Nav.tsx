@@ -1,8 +1,8 @@
 "use client";
-import { Home as HomeIcon, Clock, Settings as SettingsIcon } from "lucide-react";
+import { Home as HomeIcon, Clock, Settings as SettingsIcon, LucideIcon } from "lucide-react";
 export type Page = "home" | "activity" | "settings" | "send" | "receive" | "shield" | "swap" | "earn";
 
-const items: { id: Page; icon: React.ComponentType<{ size?: number; strokeWidth?: number }> }[] = [
+const items: { id: Page; icon: LucideIcon }[] = [
   { id: "home", icon: HomeIcon },
   { id: "activity", icon: Clock },
   { id: "settings", icon: SettingsIcon },

@@ -1,9 +1,9 @@
 "use client";
-import { ArrowUp, ArrowDown, Shield, ArrowUpDown } from "lucide-react";
+import { ArrowUp, ArrowDown, Shield, ArrowUpDown, LucideIcon } from "lucide-react";
 import { Page } from "./Nav";
 
 export function ActionRow({ onGo }: { onGo: (page: Page) => void }) {
-  const actions: { id: Page; label: string; Icon: React.ComponentType<{ size?: number; strokeWidth?: number }> }[] = [
+  const actions: { id: Page; label: string; Icon: LucideIcon }[] = [
     { id: "send", label: "SEND", Icon: ArrowUp },
     { id: "receive", label: "RECEIVE", Icon: ArrowDown },
     { id: "shield", label: "SHIELD", Icon: Shield },
