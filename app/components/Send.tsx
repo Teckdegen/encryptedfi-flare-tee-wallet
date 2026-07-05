@@ -1,10 +1,10 @@
 "use client";
 import { ArrowUp } from "lucide-react";
-import { TOKENS } from "../lib/contracts";
+import { TOKENS, Token } from "../lib/contracts";
 import { useState } from "react";
 
 export function Send() {
-  const [token, setToken] = useState(TOKENS[0]);
+  const [token, setToken] = useState<Token>(TOKENS[0]);
   const [amount, setAmount] = useState("");
   const [recipient, setRecipient] = useState("");
 

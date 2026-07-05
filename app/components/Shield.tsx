@@ -1,6 +1,6 @@
 "use client";
 import { useAccount, useWriteContract, useReadContract } from "wagmi";
-import { TOKENS, VAULT, VAULT_ABI, ERC20_ABI } from "../lib/contracts";
+import { TOKENS, Token, VAULT, VAULT_ABI, ERC20_ABI } from "../lib/contracts";
 import { parseUnits, keccak256, toHex, encodeAbiParameters, formatUnits } from "viem";
 import { useState } from "react";
 import { Shield as ShieldIcon, ArrowDown } from "lucide-react";
@@ -14,7 +14,7 @@ function randomBytes32(): `0x${string}` {
 export function Shield() {
   const { address } = useAccount();
   const [mode, setMode] = useState<"shield" | "unshield">("shield");
-  const [token, setToken] = useState(TOKENS[0]);
+  const [token, setToken] = useState<Token>(TOKENS[0]);
   const [amount, setAmount] = useState("");
   const { writeContractAsync, isPending } = useWriteContract();
   const [step, setStep] = useState<"idle" | "approving" | "shielding" | "done" | "err">("idle");

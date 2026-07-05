@@ -1,11 +1,11 @@
 "use client";
 import { ArrowUpDown } from "lucide-react";
-import { TOKENS } from "../lib/contracts";
+import { TOKENS, Token } from "../lib/contracts";
 import { useState } from "react";
 
 export function Swap() {
-  const [from, setFrom] = useState(TOKENS[0]);
-  const [to, setTo] = useState(TOKENS[1]);
+  const [from, setFrom] = useState<Token>(TOKENS[0]);
+  const [to, setTo] = useState<Token>(TOKENS[1]);
   const [amount, setAmount] = useState("");
 
   return (

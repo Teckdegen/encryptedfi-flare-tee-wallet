@@ -30,6 +30,8 @@ export const TOKENS = [
   { symbol: "ENIG", name: "Enigma", address: "0x282F06BdE6E660d62a17B9A651a84e1CFEDD3927", decimals: 18 },
 ] as const;
 
+export type Token = (typeof TOKENS)[number];
+
 export const CTOKENS = [
   { symbol: "cGHST", address: "0x83Cfd62A53210139f52DB6451bD0aaBDC71De283", underlying: "GHST", apr: 500 },
   { symbol: "cCIPH", address: "0x698cD6E98c04EE069025f44E4D8Ede4ab627EAea", underlying: "CIPH", apr: 450 },
