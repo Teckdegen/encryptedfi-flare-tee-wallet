@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useAccount, useChainId, useSwitchChain } from "wagmi";
-import { Welcome } from "./components/Welcome";
+import { useChainId, useSwitchChain, useAccount } from "wagmi";
 import { Nav, Page } from "./components/Nav";
 import { Home } from "./components/Home";
 import { SubHeader } from "./components/SubHeader";
@@ -20,13 +19,11 @@ export default function Index() {
   const { switchChain } = useSwitchChain();
   const [page, setPage] = useState<Page>("home");
 
-  if (!isConnected) return <Welcome />;
-
-  if (chainId !== 114) {
+  if (isConnected && chainId !== 114) {
     return (
       <main className="min-h-screen flex items-center justify-center px-6 relative z-10">
         <div className="glass rounded-3xl p-8 max-w-md w-full text-center">
-          <AlertTriangle size={40} className="mx-auto mb-4 text-amber-400" />
+          <AlertTriangle size={40} className="mx-auto mb-4 text-amber-600" />
           <h2 className="text-xl font-bold mb-2">Wrong network</h2>
           <p className="text-sm text-muted mb-6">Switch to Flare Coston2 to continue.</p>
           <button
@@ -51,7 +48,7 @@ export default function Index() {
 
   return (
     <main className="min-h-screen relative z-10 pb-28">
-      <div className="max-w-md mx-auto px-4 pt-6">
+      <div className="w-full max-w-md mx-auto px-4 pt-6 sm:pt-8">
         {page === "home" && <Home onGo={setPage} />}
         {isSubPage && (
           <>

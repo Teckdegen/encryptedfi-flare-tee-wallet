@@ -18,7 +18,7 @@ const COLOR_MAP: Record<string, string> = {
 };
 
 export function TokenList({ filter, hidden }: { filter: Filter; hidden: boolean }) {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const { data: balances } = useReadContracts({
     contracts: TOKENS.map((t) => ({
       address: t.address as `0x${string}`,
@@ -36,22 +36,17 @@ export function TokenList({ filter, hidden }: { filter: Filter; hidden: boolean 
         const publicFmt = bal !== undefined ? formatUnits(bal, t.decimals) : "0";
         const publicNum = Number(publicFmt);
 
-        const showPublic = filter === "all" || filter === "public";
-        const showPrivate = filter === "all" || filter === "private";
-
-        const publicDisplay = hidden ? "•••" : publicNum.toLocaleString(undefined, { maximumFractionDigits: 4 });
-        const privateDisplay = "···";
-        const combinedDisplay = hidden ? "•••" : publicNum.toLocaleString(undefined, { maximumFractionDigits: 4 });
-
         let mainDisplay = "";
-        if (filter === "public") mainDisplay = publicDisplay;
-        else if (filter === "private") mainDisplay = privateDisplay;
-        else mainDisplay = combinedDisplay;
+        if (!isConnected) mainDisplay = "—";
+        else if (hidden) mainDisplay = "•••";
+        else if (filter === "public") mainDisplay = publicNum.toLocaleString(undefined, { maximumFractionDigits: 4 });
+        else if (filter === "private") mainDisplay = "···";
+        else mainDisplay = publicNum.toLocaleString(undefined, { maximumFractionDigits: 4 });
 
         return (
           <div key={t.symbol} className="glass rounded-2xl px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${COLOR_MAP[t.symbol] ?? "from-gray-500 to-gray-700"} flex items-center justify-center text-sm font-bold`}>
+              <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${COLOR_MAP[t.symbol] ?? "from-gray-500 to-gray-700"} flex items-center justify-center text-sm font-bold text-white`}>
                 {t.symbol.charAt(0)}
               </div>
               <div>
@@ -61,9 +56,7 @@ export function TokenList({ filter, hidden }: { filter: Filter; hidden: boolean 
             </div>
             <div className="text-right">
               <div className="text-sm font-mono font-bold">{mainDisplay}</div>
-              <div className="text-[10px] text-muted uppercase tracking-widest">
-                {filter === "all" ? `${showPublic ? "pub" : ""}${showPublic && showPrivate ? " · " : ""}${showPrivate ? "priv" : ""}` : filter}
-              </div>
+              <div className="text-[10px] text-muted uppercase tracking-widest">{filter}</div>
             </div>
           </div>
         );

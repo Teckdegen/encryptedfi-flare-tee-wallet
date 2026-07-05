@@ -16,7 +16,7 @@ export function FilterTabs({ current, onChange }: { current: Filter; onChange: (
             key={t.id}
             onClick={() => onChange(t.id)}
             className={`py-2.5 text-xs font-bold tracking-widest rounded-full transition ${
-              active ? "bg-white/10 text-ink" : "text-muted hover:text-ink"
+              active ? "bg-black/10 text-ink" : "text-muted hover:text-ink"
             }`}
           >
             {t.label}

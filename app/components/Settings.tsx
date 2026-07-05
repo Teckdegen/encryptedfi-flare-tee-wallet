@@ -1,15 +1,16 @@
 "use client";
 import { useAccount, useDisconnect, useChainId, useBalance } from "wagmi";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { PROTOCOL, VAULT, RELAYER } from "../lib/contracts";
 import { formatEther } from "viem";
-import { Copy, LogOut, ExternalLink } from "lucide-react";
+import { Copy, LogOut, ExternalLink, Wallet } from "lucide-react";
 import { useState } from "react";
 
 export function Settings() {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const chainId = useChainId();
-  const { data: nativeBal } = useBalance({ address });
+  const { data: nativeBal } = useBalance({ address, query: { enabled: !!address } });
   const [copied, setCopied] = useState<string | null>(null);
 
   const short = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "";
@@ -23,34 +24,56 @@ export function Settings() {
 
   return (
     <div className="space-y-4">
-      <div className="glass rounded-3xl p-6">
-        <div className="text-xs uppercase tracking-widest text-muted mb-4">Wallet</div>
-
-        <div className="glass-strong rounded-2xl p-4 mb-3">
-          <div className="text-xs text-muted uppercase tracking-widest mb-1">Address</div>
-          <button onClick={() => copy(address ?? "", "addr")} className="text-sm font-mono w-full text-left break-all flex items-center justify-between gap-2">
-            <span>{short}</span>
-            <Copy size={14} className={copied === "addr" ? "text-success" : "text-muted"} />
-          </button>
+      {!isConnected && (
+        <div className="glass rounded-3xl p-6">
+          <div className="text-xs uppercase tracking-widest text-muted mb-4">Wallet</div>
+          <ConnectButton.Custom>
+            {({ openConnectModal, mounted }) => {
+              if (!mounted) return null;
+              return (
+                <button
+                  onClick={openConnectModal}
+                  className="glass-btn w-full py-4 rounded-2xl text-sm font-bold tracking-widest uppercase flex items-center justify-center gap-2"
+                >
+                  <Wallet size={16} />
+                  Connect Wallet
+                </button>
+              );
+            }}
+          </ConnectButton.Custom>
         </div>
+      )}
 
-        <div className="glass-strong rounded-2xl p-4 mb-3">
-          <div className="text-xs text-muted uppercase tracking-widest mb-1">Native balance</div>
-          <div className="text-sm font-mono">{Number(bal).toFixed(4)} C2FLR</div>
-        </div>
+      {isConnected && (
+        <div className="glass rounded-3xl p-6">
+          <div className="text-xs uppercase tracking-widest text-muted mb-4">Wallet</div>
 
-        <div className="glass-strong rounded-2xl p-4">
-          <div className="text-xs text-muted uppercase tracking-widest mb-1">Network</div>
-          <div className="text-sm font-mono flex items-center gap-2">
-            {chainId === 114 ? (
-              <>
-                <span className="w-2 h-2 rounded-full bg-success" />
-                Flare Coston2
-              </>
-            ) : `Chain ${chainId}`}
+          <div className="glass-strong rounded-2xl p-4 mb-3">
+            <div className="text-xs text-muted uppercase tracking-widest mb-1">Address</div>
+            <button onClick={() => copy(address ?? "", "addr")} className="text-sm font-mono w-full text-left break-all flex items-center justify-between gap-2">
+              <span>{short}</span>
+              <Copy size={14} className={copied === "addr" ? "text-success" : "text-muted"} />
+            </button>
+          </div>
+
+          <div className="glass-strong rounded-2xl p-4 mb-3">
+            <div className="text-xs text-muted uppercase tracking-widest mb-1">Native balance</div>
+            <div className="text-sm font-mono">{Number(bal).toFixed(4)} C2FLR</div>
+          </div>
+
+          <div className="glass-strong rounded-2xl p-4">
+            <div className="text-xs text-muted uppercase tracking-widest mb-1">Network</div>
+            <div className="text-sm font-mono flex items-center gap-2">
+              {chainId === 114 ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-success" />
+                  Flare Coston2
+                </>
+              ) : `Chain ${chainId}`}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="glass rounded-3xl p-6">
         <div className="text-xs uppercase tracking-widest text-muted mb-4">Contracts</div>
@@ -73,23 +96,25 @@ export function Settings() {
 
       <div className="glass rounded-3xl p-6">
         <div className="text-xs uppercase tracking-widest text-muted mb-4">Links</div>
-        <a href="https://coston2-explorer.flare.network" target="_blank" rel="noreferrer" className="glass-strong rounded-2xl p-4 flex items-center justify-between hover:bg-white/10 transition mb-2">
+        <a href="https://coston2-explorer.flare.network" target="_blank" rel="noreferrer" className="glass-strong rounded-2xl p-4 flex items-center justify-between hover:bg-white/40 transition mb-2">
           <span className="text-sm">Coston2 Explorer</span>
           <ExternalLink size={14} className="text-muted" />
         </a>
-        <a href="https://github.com/encryptedfinance/encryptedfinance-flare" target="_blank" rel="noreferrer" className="glass-strong rounded-2xl p-4 flex items-center justify-between hover:bg-white/10 transition">
+        <a href="https://github.com/encryptedfinance/encryptedfinance-flare" target="_blank" rel="noreferrer" className="glass-strong rounded-2xl p-4 flex items-center justify-between hover:bg-white/40 transition">
           <span className="text-sm">GitHub</span>
           <ExternalLink size={14} className="text-muted" />
         </a>
       </div>
 
-      <button
-        onClick={() => disconnect()}
-        className="w-full py-4 rounded-2xl text-sm font-bold tracking-widest uppercase bg-danger/10 border border-danger/30 text-danger hover:bg-danger/20 transition flex items-center justify-center gap-2"
-      >
-        <LogOut size={16} />
-        Disconnect wallet
-      </button>
+      {isConnected && (
+        <button
+          onClick={() => disconnect()}
+          className="w-full py-4 rounded-2xl text-sm font-bold tracking-widest uppercase bg-danger/10 border border-danger/30 text-danger hover:bg-danger/20 transition flex items-center justify-center gap-2"
+        >
+          <LogOut size={16} />
+          Disconnect wallet
+        </button>
+      )}
 
       <div className="text-center text-[10px] text-muted uppercase tracking-widest pt-4 pb-4">
         Encrypted Finance · v0.1.0 · Coston2 Beta
