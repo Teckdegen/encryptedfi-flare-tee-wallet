@@ -39,9 +39,10 @@ export default function Index() {
     );
   }
 
-  const isSubPage = ["send", "receive", "shield", "unshield", "swap", "earn", "more"].includes(page);
+  if (page === "send") return <Send onBack={() => setPage("home")} />;
+
+  const isSubPage = ["receive", "shield", "unshield", "swap", "earn", "more"].includes(page);
   const subTitle: Record<string, string> = {
-    send: "Send",
     receive: "Receive",
     shield: "Shield",
     unshield: "Unshield",
@@ -57,7 +58,6 @@ export default function Index() {
         {isSubPage && (
           <>
             <SubHeader title={subTitle[page]} onBack={() => setPage("home")} />
-            {page === "send" && <Send />}
             {page === "receive" && <Receive />}
             {page === "shield" && <Shield />}
             {page === "unshield" && <Unshield />}
