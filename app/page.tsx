@@ -5,10 +5,12 @@ import { Nav, Page } from "./components/Nav";
 import { Home } from "./components/Home";
 import { SubHeader } from "./components/SubHeader";
 import { Shield } from "./components/Shield";
+import { Unshield } from "./components/Unshield";
 import { Send } from "./components/Send";
 import { Receive } from "./components/Receive";
 import { Swap } from "./components/Swap";
 import { Earn } from "./components/Earn";
+import { More } from "./components/More";
 import { Activity } from "./components/Activity";
 import { Settings } from "./components/Settings";
 import { AlertTriangle } from "lucide-react";
@@ -37,18 +39,20 @@ export default function Index() {
     );
   }
 
-  const isSubPage = ["send", "receive", "shield", "swap", "earn"].includes(page);
+  const isSubPage = ["send", "receive", "shield", "unshield", "swap", "earn", "more"].includes(page);
   const subTitle: Record<string, string> = {
     send: "Send",
     receive: "Receive",
     shield: "Shield",
+    unshield: "Unshield",
     swap: "Swap",
     earn: "Earn",
+    more: "More apps",
   };
 
   return (
     <main className="min-h-screen relative z-10 pb-28">
-      <div className="w-full max-w-md mx-auto px-4 pt-6 sm:pt-8">
+      <div className="w-full max-w-2xl mx-auto px-4 sm:px-8 pt-6 sm:pt-10">
         {page === "home" && <Home onGo={setPage} />}
         {isSubPage && (
           <>
@@ -56,8 +60,10 @@ export default function Index() {
             {page === "send" && <Send />}
             {page === "receive" && <Receive />}
             {page === "shield" && <Shield />}
+            {page === "unshield" && <Unshield />}
             {page === "swap" && <Swap />}
             {page === "earn" && <Earn />}
+            {page === "more" && <More onGo={setPage} />}
           </>
         )}
         {page === "activity" && (

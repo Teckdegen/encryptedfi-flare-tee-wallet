@@ -2,7 +2,7 @@
 import { useAccount, useReadContracts } from "wagmi";
 import { TOKENS, ERC20_ABI } from "../lib/contracts";
 import { formatUnits } from "viem";
-import { Filter } from "./FilterTabs";
+import { Mode } from "./BalanceCard";
 
 const COLOR_MAP: Record<string, string> = {
   GHST: "from-slate-400 to-slate-600",
@@ -17,8 +17,9 @@ const COLOR_MAP: Record<string, string> = {
   ENIG: "from-lime-400 to-green-600",
 };
 
-export function TokenList({ filter, hidden }: { filter: Filter; hidden: boolean }) {
+export function TokenList({ mode }: { mode: Mode }) {
   const { address, isConnected } = useAccount();
+
   const { data: balances } = useReadContracts({
     contracts: TOKENS.map((t) => ({
       address: t.address as `0x${string}`,
@@ -26,23 +27,20 @@ export function TokenList({ filter, hidden }: { filter: Filter; hidden: boolean 
       functionName: "balanceOf" as const,
       args: address ? [address] : undefined,
     })),
-    query: { enabled: !!address, refetchInterval: 5000 },
+    query: { enabled: !!address && mode === "public", refetchInterval: 5000 },
   });
 
   return (
     <div className="space-y-2">
       {TOKENS.map((t, i) => {
-        const bal = balances?.[i]?.result as bigint | undefined;
-        const publicFmt = bal !== undefined ? formatUnits(bal, t.decimals) : "0";
-        const publicNum = Number(publicFmt);
-
-        let mainDisplay = "";
-        if (!isConnected) mainDisplay = "—";
-        else if (hidden) mainDisplay = "•••";
-        else if (filter === "public") mainDisplay = publicNum.toLocaleString(undefined, { maximumFractionDigits: 4 });
-        else if (filter === "private") mainDisplay = "···";
-        else mainDisplay = publicNum.toLocaleString(undefined, { maximumFractionDigits: 4 });
-
+        let display: string;
+        if (!isConnected) display = "—";
+        else if (mode === "private") display = "0";
+        else {
+          const bal = balances?.[i]?.result as bigint | undefined;
+          const num = bal !== undefined ? Number(formatUnits(bal, t.decimals)) : 0;
+          display = num.toLocaleString(undefined, { maximumFractionDigits: 4 });
+        }
         return (
           <div key={t.symbol} className="glass rounded-2xl px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -54,10 +52,7 @@ export function TokenList({ filter, hidden }: { filter: Filter; hidden: boolean 
                 <div className="text-xs text-muted">{t.name}</div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-sm font-mono font-bold">{mainDisplay}</div>
-              <div className="text-[10px] text-muted uppercase tracking-widest">{filter}</div>
-            </div>
+            <div className="text-sm font-mono font-bold">{display}</div>
           </div>
         );
       })}

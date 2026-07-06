@@ -1,23 +1,18 @@
 "use client";
 import { ChevronDown, Wallet } from "lucide-react";
 import { useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useBalance } from "wagmi";
+import { formatEther } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
-export function BalanceCard({
-  syncing,
-  hidden,
-  publicUsd,
-  privateUsd,
-}: {
-  syncing: boolean;
-  hidden: boolean;
-  publicUsd: number;
-  privateUsd: number;
-}) {
-  const { isConnected } = useAccount();
+export type Mode = "public" | "private";
+
+const FLR_USD = 0.0068;
+
+export function BalanceCard({ mode }: { mode: Mode }) {
+  const { address, isConnected } = useAccount();
+  const { data: nativeBal } = useBalance({ address, query: { enabled: !!address } });
   const [expanded, setExpanded] = useState(false);
-  const total = publicUsd + privateUsd;
 
   if (!isConnected) {
     return (
@@ -38,24 +33,24 @@ export function BalanceCard({
             );
           }}
         </ConnectButton.Custom>
-        <div className="text-xs text-muted mt-4 text-center">
-          Connect an EVM wallet on Coston2 to begin.
-        </div>
       </div>
     );
   }
 
-  const display = hidden ? "•••••" : `$${total.toFixed(2)}`;
+  const flr = nativeBal ? Number(formatEther(nativeBal.value)) : 0;
+  const publicUsd = flr * FLR_USD;
+  const privateUsd = 0;
+
+  const total = mode === "private" ? privateUsd : publicUsd;
+  const display = `$${total.toFixed(2)}`;
   const [dollars, cents] = display.split(".");
 
   return (
     <div className="glass rounded-3xl p-6 mb-6 relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 via-amber-300 to-rose-400 opacity-70" />
       <div className="flex items-center gap-2 text-sm text-muted mb-2">
-        <span>{syncing ? "Syncing" : "Balance"}</span>
-        {syncing && (
-          <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-        )}
+        <span>Syncing</span>
+        <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
       </div>
       <div className="flex items-end justify-between">
         <div className="text-5xl font-bold tracking-tight">
@@ -69,15 +64,14 @@ export function BalanceCard({
           <ChevronDown size={16} className={`text-muted transition ${expanded ? "rotate-180" : ""}`} />
         </button>
       </div>
-      {expanded && (
+      {mode === "public" && (
+        <div className="text-xs text-muted mt-1">1 FLR = ${FLR_USD.toFixed(4)}</div>
+      )}
+      {expanded && mode === "public" && (
         <div className="mt-4 pt-4 border-t border-black/5 space-y-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted">Public</span>
-            <span className="font-mono">{hidden ? "•••" : `$${publicUsd.toFixed(2)}`}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted">Private</span>
-            <span className="font-mono">{hidden ? "•••" : `$${privateUsd.toFixed(2)}`}</span>
+            <span className="text-muted">C2FLR</span>
+            <span className="font-mono">{flr.toFixed(4)}</span>
           </div>
         </div>
       )}
