@@ -54,8 +54,8 @@ function shortAddr(a: string): string {
 
 function Frame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-30 flex justify-center bg-black/25 sm:backdrop-blur-sm">
-      <div className="w-full max-w-md h-[100dvh] sm:h-auto sm:my-6 sm:rounded-3xl sm:border sm:border-white/60 sm:shadow-2xl bg-bg flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-30 flex justify-center overflow-hidden">
+      <div className="w-full max-w-md h-[100dvh] flex flex-col overflow-hidden">
         {children}
       </div>
     </div>
