@@ -5,10 +5,9 @@ export function Swap() {
   return (
     <SwapCard
       title="Swap"
-      fromLabel="You Pay"
-      toLabel="You Receive"
+      mode="swap"
       submitLabel="Coming soon (TEE required)"
-      hint="Private swaps route through the TEE. Activates when FCC registration completes."
+      hint="Private swap between two encrypted notes. Activates with FCC."
     />
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 import { TOKENS, Token } from "../lib/contracts";
-import { ChevronDown, ArrowUpDown, Settings2 } from "lucide-react";
+import { ChevronDown, ArrowDown, Settings2 } from "lucide-react";
 import { useState } from "react";
+import { TokenPicker } from "./TokenPicker";
 
 const COLOR_MAP: Record<string, string> = {
   GHST: "from-slate-400 to-slate-600",
@@ -16,70 +17,35 @@ const COLOR_MAP: Record<string, string> = {
   ENIG: "from-lime-400 to-green-600",
 };
 
-function TokenBadge({ token, onSelect }: { token: Token; onSelect: () => void }) {
+function TokenBadge({ symbol, encrypted, onSelect, locked }: { symbol: string; encrypted?: boolean; onSelect: () => void; locked?: boolean }) {
+  const base = symbol.replace(/^e/, "");
+  const display = encrypted ? `e${base}` : base;
   return (
     <button
       onClick={onSelect}
-      className="flex items-center gap-2 glass-strong rounded-full pl-1 pr-3 py-1 hover:bg-white/40 transition"
+      disabled={locked}
+      className="flex items-center gap-2 glass-strong rounded-full pl-1 pr-3 py-1 hover:bg-white/40 transition disabled:opacity-100 disabled:cursor-default"
     >
-      <div className={`w-6 h-6 rounded-full bg-gradient-to-br ${COLOR_MAP[token.symbol] ?? "from-gray-500 to-gray-700"} flex items-center justify-center text-[10px] font-bold text-white`}>
-        {token.symbol.charAt(0)}
+      <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${COLOR_MAP[base] ?? "from-gray-500 to-gray-700"} flex items-center justify-center text-[11px] font-bold text-white`}>
+        {display.charAt(0)}
       </div>
-      <span className="text-sm font-bold">{token.symbol}</span>
-      <ChevronDown size={14} className="text-muted" />
+      <span className="text-sm font-bold">{display}</span>
+      {!locked && <ChevronDown size={14} className="text-muted" />}
     </button>
   );
 }
 
-function TokenPicker({
-  current,
-  onPick,
-  onClose,
-}: {
-  current: Token;
-  onPick: (t: Token) => void;
-  onClose: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 z-30 flex items-end justify-center p-4" onClick={onClose}>
-      <div
-        className="glass-strong rounded-3xl p-4 w-full max-w-md max-h-[70vh] overflow-y-auto hide-scrollbar"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="text-xs uppercase tracking-widest text-muted mb-3 px-2">Select token</div>
-        <div className="space-y-1">
-          {TOKENS.map((t) => (
-            <button
-              key={t.symbol}
-              onClick={() => { onPick(t); onClose(); }}
-              className={`w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/40 transition ${current.symbol === t.symbol ? "bg-white/30" : ""}`}
-            >
-              <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${COLOR_MAP[t.symbol] ?? "from-gray-500 to-gray-700"} flex items-center justify-center text-sm font-bold text-white`}>
-                {t.symbol.charAt(0)}
-              </div>
-              <div className="flex-1 text-left">
-                <div className="text-sm font-bold">{t.symbol}</div>
-                <div className="text-xs text-muted">{t.name}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+type Mode = "shield" | "unshield" | "swap";
 
 export function SwapCard({
   title,
-  fromLabel,
-  toLabel,
+  mode,
   submitLabel,
   onSubmit,
   hint,
 }: {
   title: string;
-  fromLabel: string;
-  toLabel: string;
+  mode: Mode;
   submitLabel: string;
   onSubmit?: (from: Token, to: Token, amount: string) => void;
   hint?: string;
@@ -89,12 +55,13 @@ export function SwapCard({
   const [amount, setAmount] = useState("0");
   const [picking, setPicking] = useState<"from" | "to" | null>(null);
 
-  const outAmount = amount && Number(amount) > 0 ? (Number(amount) * 0.995).toFixed(4) : "0";
+  const linked = mode !== "swap";
+  const displayFrom = mode === "unshield" ? true : false;
+  const displayTo = mode === "shield" ? true : linked ? false : false;
 
-  function swapTokens() {
-    setFromToken(toToken);
-    setToToken(fromToken);
-  }
+  const effectiveTo = linked ? fromToken : toToken;
+
+  const outAmount = amount && Number(amount) > 0 ? (Number(amount) * 0.995).toFixed(4) : "0";
 
   return (
     <div className="flex flex-col gap-3">
@@ -106,7 +73,7 @@ export function SwapCard({
       </div>
 
       <div className="glass rounded-3xl p-5">
-        <div className="text-xs text-muted uppercase tracking-widest mb-3">{fromLabel}</div>
+        <div className="text-xs text-muted uppercase tracking-widest mb-3">You Pay</div>
         <div className="flex items-center justify-between gap-3">
           <input
             type="number"
@@ -116,33 +83,37 @@ export function SwapCard({
             className="bg-transparent text-4xl font-bold tracking-tight w-full focus:outline-none min-w-0"
             placeholder="0"
           />
-          <TokenBadge token={fromToken} onSelect={() => setPicking("from")} />
+          <TokenBadge
+            symbol={fromToken.symbol}
+            encrypted={displayFrom}
+            onSelect={() => setPicking("from")}
+          />
         </div>
       </div>
 
       <div className="flex justify-center -my-2">
-        <button
-          onClick={swapTokens}
-          className="glass-strong w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/50 transition z-10"
-        >
-          <ArrowUpDown size={16} className="text-ink" />
-        </button>
+        <div className="glass-strong w-10 h-10 rounded-full flex items-center justify-center z-10">
+          <ArrowDown size={16} className="text-ink" />
+        </div>
       </div>
 
       <div className="glass rounded-3xl p-5">
-        <div className="text-xs text-muted uppercase tracking-widest mb-3">{toLabel}</div>
+        <div className="text-xs text-muted uppercase tracking-widest mb-3">You Receive</div>
         <div className="flex items-center justify-between gap-3">
-          <div className="text-4xl font-bold tracking-tight text-muted">
-            {outAmount}
-          </div>
-          <TokenBadge token={toToken} onSelect={() => setPicking("to")} />
+          <div className="text-4xl font-bold tracking-tight text-muted">{outAmount}</div>
+          <TokenBadge
+            symbol={effectiveTo.symbol}
+            encrypted={displayTo}
+            onSelect={() => !linked && setPicking("to")}
+            locked={linked}
+          />
         </div>
       </div>
 
       <button
-        onClick={() => onSubmit?.(fromToken, toToken, amount)}
+        onClick={() => onSubmit?.(fromToken, effectiveTo, amount)}
         disabled={!amount || Number(amount) === 0}
-        className="glass-btn w-full py-4 rounded-2xl text-sm font-bold tracking-widest uppercase mt-3"
+        className="glass-btn w-full py-4 rounded-full text-sm font-bold tracking-widest uppercase mt-3"
       >
         {submitLabel}
       </button>
@@ -156,6 +127,8 @@ export function SwapCard({
           current={picking === "from" ? fromToken : toToken}
           onPick={(t) => (picking === "from" ? setFromToken(t) : setToToken(t))}
           onClose={() => setPicking(null)}
+          label={picking === "from" ? "You Pay" : "You Receive"}
+          encrypted={picking === "from" ? displayFrom : displayTo}
         />
       )}
     </div>

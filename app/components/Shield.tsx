@@ -52,11 +52,10 @@ export function Shield() {
   return (
     <SwapCard
       title="Shield"
-      fromLabel="You Pay (Public)"
-      toLabel="You Receive (Private)"
+      mode="shield"
       submitLabel="Shield"
       onSubmit={onSubmit}
-      hint="0.5% fee. Turns tokens into encrypted notes."
+      hint="Turn a token into its encrypted note. 0.5% fee."
     />
   );
 }

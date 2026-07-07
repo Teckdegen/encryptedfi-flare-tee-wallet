@@ -1,8 +1,10 @@
 "use client";
-import { TrendingUp, Layers, Coins, Vote, Shuffle, KeyRound, Users, Palette, LucideIcon } from "lucide-react";
+import { TrendingUp, Layers, Coins, Vote, Shuffle, KeyRound, Users, Palette, Shield, ArrowUpDown, LucideIcon } from "lucide-react";
 import { Page } from "./Nav";
 
 const apps: { id: Page | "soon"; label: string; desc: string; Icon: LucideIcon; live: boolean }[] = [
+  { id: "unshield", label: "Unshield", desc: "Turn encrypted notes back to public tokens", Icon: Shield, live: true },
+  { id: "swap", label: "Swap", desc: "Private swap between encrypted notes", Icon: ArrowUpDown, live: true },
   { id: "earn", label: "Lending", desc: "Deposit encrypted notes into cToken markets", Icon: TrendingUp, live: true },
   { id: "soon", label: "Stake", desc: "Stake into sFLR privately for FLR rewards", Icon: Coins, live: false },
   { id: "soon", label: "Bridge", desc: "Move encrypted assets cross chain", Icon: Shuffle, live: false },
