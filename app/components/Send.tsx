@@ -1,6 +1,6 @@
 "use client";
 import { useAccount } from "wagmi";
-import { X, Plus, Search, ScanLine, ChevronLeft, ChevronDown, Delete } from "lucide-react";
+import { X, Search, ScanLine, ChevronLeft, ChevronDown, Delete } from "lucide-react";
 import { useState, useEffect } from "react";
 import { TOKENS, Token } from "../lib/contracts";
 import { TokenPicker } from "./TokenPicker";
@@ -24,6 +24,7 @@ const FAKE_PRICES: Record<string, number> = {
 };
 
 const RECENTS_KEY = "encryptedfi.send.recents";
+const ADDR_RE = /^0x[a-fA-F0-9]{40}$/;
 
 type Screen = "recipients" | "compose" | "review";
 
@@ -51,6 +52,16 @@ function shortAddr(a: string): string {
   return `${a.slice(0, 6)}...${a.slice(-5)}`;
 }
 
+function Frame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 z-30 flex justify-center bg-black/25 sm:backdrop-blur-sm">
+      <div className="w-full max-w-md h-[100dvh] sm:h-auto sm:my-6 sm:rounded-3xl sm:border sm:border-white/60 sm:shadow-2xl bg-bg flex flex-col overflow-hidden">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export function Send({ onBack }: { onBack: () => void }) {
   const { address } = useAccount();
   const [screen, setScreen] = useState<Screen>("recipients");
@@ -64,6 +75,15 @@ export function Send({ onBack }: { onBack: () => void }) {
   const [recents, setRecents] = useState<string[]>([]);
 
   useEffect(() => setRecents(loadRecents()), []);
+
+  useEffect(() => {
+    if (screen === "recipients" && ADDR_RE.test(search.trim())) {
+      const a = search.trim();
+      setRecipient(a);
+      setSearch("");
+      setScreen("compose");
+    }
+  }, [search, screen]);
 
   function press(k: string) {
     setAmount((cur) => {
@@ -101,24 +121,13 @@ export function Send({ onBack }: { onBack: () => void }) {
     : recents;
 
   if (screen === "recipients") {
-    const canProceedTyped = search.startsWith("0x") && search.length >= 6;
     return (
-      <div className="fixed inset-0 z-30 bg-bg flex flex-col">
-        <div className="flex items-center justify-between px-5 pt-6 pb-4">
-          <div className="flex items-center gap-4">
-            <button onClick={onBack} className="glass w-10 h-10 rounded-full flex items-center justify-center">
-              <X size={18} className="text-ink" />
-            </button>
-            <div className="text-lg font-bold">Send</div>
-          </div>
-          <button
-            onClick={() => canProceedTyped && pickRecipient(search)}
-            disabled={!canProceedTyped}
-            className="w-10 h-10 rounded-full glass flex items-center justify-center disabled:opacity-30"
-            aria-label="add"
-          >
-            <Plus size={16} className="text-ink" />
+      <Frame>
+        <div className="flex items-center px-5 pt-6 pb-4">
+          <button onClick={onBack} className="glass w-10 h-10 rounded-full flex items-center justify-center">
+            <X size={18} className="text-ink" />
           </button>
+          <div className="text-lg font-bold ml-4">Send</div>
         </div>
 
         <div className="px-5 pb-3 flex items-center gap-2 text-sm font-bold text-ink">
@@ -152,20 +161,23 @@ export function Send({ onBack }: { onBack: () => void }) {
               placeholder="0x wallet address"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-transparent flex-1 text-sm focus:outline-none min-w-0"
+              autoFocus
+              spellCheck={false}
+              autoComplete="off"
+              className="bg-transparent flex-1 text-sm focus:outline-none min-w-0 font-mono"
             />
             <button className="w-9 h-9 rounded-full glass-strong flex items-center justify-center">
               <ScanLine size={16} className="text-ink" />
             </button>
           </div>
         </div>
-      </div>
+      </Frame>
     );
   }
 
   if (screen === "review") {
     return (
-      <div className="fixed inset-0 z-30 bg-bg flex flex-col">
+      <Frame>
         <div className="flex items-center gap-4 px-5 pt-6 pb-4">
           <button onClick={() => setScreen("compose")} className="glass w-10 h-10 rounded-full flex items-center justify-center">
             <ChevronLeft size={18} className="text-ink" />
@@ -225,12 +237,12 @@ export function Send({ onBack }: { onBack: () => void }) {
             {txHash ? "Sent" : confirming ? "Confirming..." : "Confirm"}
           </button>
         </div>
-      </div>
+      </Frame>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-30 bg-bg flex flex-col">
+    <Frame>
       <div className="flex items-center px-5 pt-6 pb-4">
         <button onClick={() => setScreen("recipients")} className="glass w-10 h-10 rounded-full flex items-center justify-center">
           <ChevronLeft size={18} className="text-ink" />
@@ -307,6 +319,6 @@ export function Send({ onBack }: { onBack: () => void }) {
           encrypted
         />
       )}
-    </div>
+    </Frame>
   );
 }
