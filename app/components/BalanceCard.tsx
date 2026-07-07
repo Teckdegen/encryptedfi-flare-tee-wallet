@@ -16,8 +16,7 @@ export function BalanceCard({ mode }: { mode: Mode }) {
 
   if (!isConnected) {
     return (
-      <div className="glass rounded-3xl p-6 mb-6 relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 via-amber-300 to-rose-400 opacity-70" />
+      <div className="glass rounded-3xl p-6 mb-6">
         <div className="text-xs text-muted mb-3 uppercase tracking-widest">Balance</div>
         <ConnectButton.Custom>
           {({ openConnectModal, mounted }) => {
@@ -46,12 +45,7 @@ export function BalanceCard({ mode }: { mode: Mode }) {
   const [dollars, cents] = display.split(".");
 
   return (
-    <div className="glass rounded-3xl p-6 mb-6 relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-400 via-amber-300 to-rose-400 opacity-70" />
-      <div className="flex items-center gap-2 text-sm text-muted mb-2">
-        <span>Syncing</span>
-        <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-      </div>
+    <div className="glass rounded-3xl p-6 mb-6">
       <div className="flex items-end justify-between">
         <div className="text-5xl font-bold tracking-tight">
           <span>{dollars}</span>
