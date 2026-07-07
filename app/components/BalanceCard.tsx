@@ -2,17 +2,33 @@
 import { ChevronDown, Wallet } from "lucide-react";
 import { useState } from "react";
 import { useAccount, useBalance } from "wagmi";
+import { useQuery } from "@tanstack/react-query";
 import { formatEther } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { fetchTokenBalances, fetchAddressInfo, formatBalance } from "../lib/explorer";
 
 export type Mode = "public" | "private";
 
-const FLR_USD = 0.0068;
+const FLR_USD_FALLBACK = 0.0068;
 
 export function BalanceCard({ mode }: { mode: Mode }) {
   const { address, isConnected } = useAccount();
   const { data: nativeBal } = useBalance({ address, query: { enabled: !!address } });
   const [expanded, setExpanded] = useState(false);
+
+  const { data: addressInfo } = useQuery({
+    queryKey: ["address-info", address],
+    queryFn: () => fetchAddressInfo(address!),
+    enabled: !!address,
+    refetchInterval: 20000,
+  });
+
+  const { data: tokenBalances } = useQuery({
+    queryKey: ["token-balances", address],
+    queryFn: () => fetchTokenBalances(address!),
+    enabled: !!address && mode === "public",
+    refetchInterval: 20000,
+  });
 
   if (!isConnected) {
     return (
@@ -37,7 +53,19 @@ export function BalanceCard({ mode }: { mode: Mode }) {
   }
 
   const flr = nativeBal ? Number(formatEther(nativeBal.value)) : 0;
-  const publicUsd = flr * FLR_USD;
+  const flrRate = addressInfo?.exchange_rate ? Number(addressInfo.exchange_rate) : FLR_USD_FALLBACK;
+
+  let tokensUsd = 0;
+  if (tokenBalances) {
+    for (const b of tokenBalances) {
+      const rate = b.token.exchange_rate ? Number(b.token.exchange_rate) : 0;
+      if (rate <= 0) continue;
+      const num = formatBalance(b.value, b.token.decimals);
+      tokensUsd += num * rate;
+    }
+  }
+
+  const publicUsd = flr * flrRate + tokensUsd;
   const privateUsd = 0;
 
   const total = mode === "private" ? privateUsd : publicUsd;
@@ -59,13 +87,17 @@ export function BalanceCard({ mode }: { mode: Mode }) {
         </button>
       </div>
       {mode === "public" && (
-        <div className="text-xs text-muted mt-1">1 FLR = ${FLR_USD.toFixed(4)}</div>
+        <div className="text-xs text-muted mt-1">1 FLR = ${flrRate.toFixed(4)}</div>
       )}
       {expanded && mode === "public" && (
         <div className="mt-4 pt-4 border-t border-black/5 space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted">C2FLR</span>
             <span className="font-mono">{flr.toFixed(4)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted">Tokens</span>
+            <span className="font-mono">${tokensUsd.toFixed(2)}</span>
           </div>
         </div>
       )}
