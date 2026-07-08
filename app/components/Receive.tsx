@@ -38,7 +38,7 @@ export function Receive() {
       </div>
 
       <div className="glass rounded-3xl p-5 text-xs text-muted leading-relaxed">
-        Anyone can send you tokens or encrypted notes at this address. Encrypted notes require the sender to know your viewing key which they resolve from this address.
+        Anyone can send you tokens or encrypted notes at this address. Encrypted notes route to you through the TEE without exposing your identity on chain.
       </div>
     </div>
   );

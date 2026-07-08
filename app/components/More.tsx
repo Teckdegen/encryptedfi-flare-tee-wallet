@@ -10,7 +10,7 @@ const apps: { id: Page | "soon"; label: string; desc: string; Icon: LucideIcon; 
   { id: "soon", label: "Bridge", desc: "Move encrypted assets cross chain", Icon: Shuffle, live: false },
   { id: "soon", label: "Perps", desc: "Perpetual futures with private positions", Icon: Layers, live: false },
   { id: "soon", label: "Governance", desc: "Vote privately using notes as weight", Icon: Vote, live: false },
-  { id: "soon", label: "View Keys", desc: "Mint one time view keys for compliance", Icon: KeyRound, live: false },
+  { id: "soon", label: "Selective Disclosure", desc: "Mint one time proofs for KYC, tax, or lender review", Icon: KeyRound, live: false },
   { id: "soon", label: "Contacts", desc: "Save addresses for private sends", Icon: Users, live: false },
   { id: "soon", label: "Themes", desc: "Change the look of your wallet", Icon: Palette, live: false },
 ];
